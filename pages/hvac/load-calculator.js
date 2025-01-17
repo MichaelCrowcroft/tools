@@ -31,16 +31,9 @@ export default function HVACLoadCalculator() {
     const win = parseFloat(windows) || 0;
     const dr = parseFloat(doors) || 0;
 
-    // Base HVAC load according to the new description:
-    //  1) (House surface in sq ft) x (height of the ceiling)
-    //  2) (# of occupants) x 100 BTU
-    //  3) (# of windows) x 1000 BTU
-    //  4) (# of exterior doors) x 1000 BTU
-    let rawBTU =
-      sf * ch + // (1)
-      occ * 100 + // (2)
-      win * 1000 + // (3)
-      dr * 1000; // (4)
+    // Base HVAC load:
+    //   (sq ft * ceiling height) + occupants*100 + windows*1000 + doors*1000
+    let rawBTU = sf * ch + occ * 100 + win * 1000 + dr * 1000;
 
     // Apply insulation factor
     const insFactor = insulationFactors[insulation] || 1;
@@ -52,202 +45,311 @@ export default function HVACLoadCalculator() {
   const hvacTonnage = (totalBTU / 12000).toFixed(2);
 
   return (
-    <>
-      {/* Header / Hero section (optional) */}
-      <section className="bg-[#004A7C] py-12 text-white text-center">
-        <h1 className="text-4xl font-semibold">HVAC Load Calculator</h1>
-        <p className="mt-2 max-w-lg mx-auto">
-          Estimate your heating and cooling requirements with this simplified Manual J approach.
-        </p>
-      </section>
+    <div className="min-h-screen bg-[#F7F7F7]">
+      {/* Header */}
+      <header className="bg-white py-12 text-center">
+        <h1 className="text-5xl font-bold text-[#0A2533] mb-4">
+          HVAC Load Calculator
+        </h1>
+      </header>
 
-      {/* Main Container */}
-      <main className="mx-auto max-w-2xl px-4 py-8 text-gray-800">
-        {/* Calculator Form */}
-        <form
-          onSubmit={handleCalculate}
-          className="bg-white rounded-lg shadow-md p-6 space-y-6"
-        >
-          <h2 className="text-xl font-bold text-[#004A7C]">
-            Enter Building Details
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        <div className="bg-[#0A2533] rounded-t-lg p-6">
+          <h2 className="text-white text-2xl font-bold text-center">
+            Manual J Load Calculation
           </h2>
+        </div>
 
-          {/* Square Footage */}
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <label
-              htmlFor="squareFootage"
-              className="text-sm font-medium text-gray-700"
-            >
-              Total Square Footage:
-            </label>
-            <input
-              id="squareFootage"
-              type="number"
-              min="0"
-              placeholder="e.g., 2000"
-              value={squareFootage}
-              onChange={(e) => setSquareFootage(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:ring-[#00aade]"
-              required
-            />
+        <div className="bg-white rounded-b-lg shadow-lg p-8">
+          <div className="grid md:grid-cols-2 gap-12">
+            {/* Calculator Form */}
+            <div className="space-y-6">
+              <form onSubmit={handleCalculate} className="space-y-6">
+                {/* Square Footage */}
+                <div className="space-y-2">
+                  <label className="flex items-center text-[#0A2533] font-medium">
+                    Total Square Footage:
+                    <button
+                      type="button"
+                      className="ml-2 text-gray-400 hover:text-gray-600"
+                      title="Room area in square feet (omit unconditioned spaces)"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                        <path strokeWidth="2" d="M12 16v-4M12 8h.01" />
+                      </svg>
+                    </button>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                      ft²
+                    </span>
+                    <input
+                      type="number"
+                      value={squareFootage}
+                      onChange={(e) => setSquareFootage(e.target.value)}
+                      className="w-full pl-12 pr-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#B4ED50] focus:border-transparent"
+                      placeholder="e.g., 2000"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Ceiling Height */}
+                <div className="space-y-2">
+                  <label className="flex items-center text-[#0A2533] font-medium">
+                    Ceiling Height:
+                    <button
+                      type="button"
+                      className="ml-2 text-gray-400 hover:text-gray-600"
+                      title="Average height of the ceiling in feet"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                        <path strokeWidth="2" d="M12 16v-4M12 8h.01" />
+                      </svg>
+                    </button>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                      ft
+                    </span>
+                    <input
+                      type="number"
+                      value={ceilingHeight}
+                      onChange={(e) => setCeilingHeight(e.target.value)}
+                      className="w-full pl-12 pr-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#B4ED50] focus:border-transparent"
+                      placeholder="e.g., 10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Occupants */}
+                <div className="space-y-2">
+                  <label className="flex items-center text-[#0A2533] font-medium">
+                    Number of Occupants:
+                    <button
+                      type="button"
+                      className="ml-2 text-gray-400 hover:text-gray-600"
+                      title="Occupants add heat gains (100 BTU each)."
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                        <path strokeWidth="2" d="M12 16v-4M12 8h.01" />
+                      </svg>
+                    </button>
+                  </label>
+                  <input
+                    type="number"
+                    value={occupants}
+                    onChange={(e) => setOccupants(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#B4ED50] focus:border-transparent"
+                    placeholder="e.g., 4"
+                  />
+                </div>
+
+                {/* Windows */}
+                <div className="space-y-2">
+                  <label className="flex items-center text-[#0A2533] font-medium">
+                    Number of Windows:
+                    <button
+                      type="button"
+                      className="ml-2 text-gray-400 hover:text-gray-600"
+                      title="Each window adds about 1000 BTU."
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                        <path strokeWidth="2" d="M12 16v-4M12 8h.01" />
+                      </svg>
+                    </button>
+                  </label>
+                  <input
+                    type="number"
+                    value={windows}
+                    onChange={(e) => setWindows(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#B4ED50] focus:border-transparent"
+                    placeholder="e.g., 12"
+                  />
+                </div>
+
+                {/* Doors */}
+                <div className="space-y-2">
+                  <label className="flex items-center text-[#0A2533] font-medium">
+                    Number of Exterior Doors:
+                    <button
+                      type="button"
+                      className="ml-2 text-gray-400 hover:text-gray-600"
+                      title="Each exterior door adds about 1000 BTU."
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                        <path strokeWidth="2" d="M12 16v-4M12 8h.01" />
+                      </svg>
+                    </button>
+                  </label>
+                  <input
+                    type="number"
+                    value={doors}
+                    onChange={(e) => setDoors(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#B4ED50] focus:border-transparent"
+                    placeholder="e.g., 3"
+                  />
+                </div>
+
+                {/* Insulation Level */}
+                <div className="space-y-2">
+                  <label className="flex items-center text-[#0A2533] font-medium">
+                    Insulation Level:
+                    <button
+                      type="button"
+                      className="ml-2 text-gray-400 hover:text-gray-600"
+                      title="Insulation factor modifies total load."
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                        <path strokeWidth="2" d="M12 16v-4M12 8h.01" />
+                      </svg>
+                    </button>
+                  </label>
+                  <select
+                    value={insulation}
+                    onChange={(e) => setInsulation(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#B4ED50] focus:border-transparent"
+                  >
+                    <option value="poor">Poor</option>
+                    <option value="average">Average</option>
+                    <option value="good">Good</option>
+                    <option value="excellent">Excellent</option>
+                  </select>
+                </div>
+
+                {/* Calculate Button */}
+                <button
+                  type="submit"
+                  className="bg-[#B4ED50] hover:bg-[#a3d647] text-[#0A2533] font-bold py-3 px-6 rounded-lg transition-colors w-full"
+                >
+                  Calculate Load
+                </button>
+              </form>
+            </div>
+
+            {/* Results Display */}
+            <div className="bg-[#0A2533] p-8 rounded-lg">
+              <h3 className="text-white text-xl mb-4">Total HVAC Load:</h3>
+              <div className="text-5xl font-bold text-white mb-4">
+                {totalBTU > 0 ? (
+                  <>
+                    <span className="text-[#B4ED50]">
+                      {totalBTU.toLocaleString()}
+                    </span>{" "}
+                    <span className="text-2xl">BTU</span>
+                  </>
+                ) : (
+                  <span className="text-[#B4ED50]">0</span>
+                )}
+              </div>
+              <h3 className="text-white text-xl mb-2">Recommended HVAC Size:</h3>
+              <div className="text-3xl font-bold text-[#B4ED50]">
+                {totalBTU > 0 && !isNaN(parseFloat(hvacTonnage))
+                  ? `${hvacTonnage} tons`
+                  : "N/A"}
+              </div>
+            </div>
           </div>
 
-          {/* Ceiling Height */}
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <label
-              htmlFor="ceilingHeight"
-              className="text-sm font-medium text-gray-700"
-            >
-              Ceiling Height (ft):
-            </label>
-            <input
-              id="ceilingHeight"
-              type="number"
-              min="0"
-              placeholder="e.g., 10"
-              value={ceilingHeight}
-              onChange={(e) => setCeilingHeight(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:ring-[#00aade]"
-              required
-            />
+          {/* CTA Section */}
+          <div className="mt-12 border-t pt-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="flex items-center gap-4">
+                <img
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-X00zVo8X4cX9U8UCz6grx775JnZ2KC.png"
+                  alt="Calculator illustration"
+                  className="w-32 opacity-50"
+                />
+                <div>
+                  <h3 className="text-xl font-bold text-[#0A2533] mb-2">
+                    Try our HVAC software
+                  </h3>
+                  <p className="text-gray-600">
+                    Put these calculations into action. Start managing
+                    your HVAC business more efficiently today.
+                  </p>
+                </div>
+              </div>
+              <button className="bg-[#B4ED50] hover:bg-[#a3d647] text-[#0A2533] font-bold py-3 px-6 rounded-lg transition-colors">
+                Start Free Trial
+              </button>
+            </div>
           </div>
-
-          {/* Occupants */}
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <label
-              htmlFor="occupants"
-              className="text-sm font-medium text-gray-700"
-            >
-              Number of Occupants:
-            </label>
-            <input
-              id="occupants"
-              type="number"
-              min="0"
-              placeholder="e.g., 4"
-              value={occupants}
-              onChange={(e) => setOccupants(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:ring-[#00aade]"
-            />
-          </div>
-
-          {/* Windows */}
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <label
-              htmlFor="windows"
-              className="text-sm font-medium text-gray-700"
-            >
-              Number of Windows:
-            </label>
-            <input
-              id="windows"
-              type="number"
-              min="0"
-              placeholder="e.g., 12"
-              value={windows}
-              onChange={(e) => setWindows(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:ring-[#00aade]"
-            />
-          </div>
-
-          {/* Doors */}
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <label
-              htmlFor="doors"
-              className="text-sm font-medium text-gray-700"
-            >
-              Number of Exterior Doors:
-            </label>
-            <input
-              id="doors"
-              type="number"
-              min="0"
-              placeholder="e.g., 2"
-              value={doors}
-              onChange={(e) => setDoors(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:ring-[#00aade]"
-            />
-          </div>
-
-          {/* Insulation Level */}
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <label
-              htmlFor="insulation"
-              className="text-sm font-medium text-gray-700"
-            >
-              Insulation Level:
-            </label>
-            <select
-              id="insulation"
-              value={insulation}
-              onChange={(e) => setInsulation(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:ring-[#00aade]"
-            >
-              <option value="poor">Poor</option>
-              <option value="average">Average</option>
-              <option value="good">Good</option>
-              <option value="excellent">Excellent</option>
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-[#00aade] hover:bg-[#008db4] text-white font-semibold py-2 rounded-md transition-all duration-200"
-          >
-            Calculate Load
-          </button>
-        </form>
-
-        {/* Results */}
-        {totalBTU > 0 && (
-          <div className="mt-8 bg-[#f5faff] p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold text-[#004A7C] mb-4">Results</h2>
-            <p className="mb-2">
-              <strong>Total HVAC Load:</strong>{" "}
-              {totalBTU.toLocaleString()} BTU
-            </p>
-            <p className="mb-2">
-              <strong>Recommended HVAC Size:</strong>{" "}
-              {isNaN(parseFloat(hvacTonnage)) ? "—" : `${hvacTonnage} tons`}
-            </p>
-          </div>
-        )}
+        </div>
 
         {/* Explanation Section */}
-        <section className="mt-8">
-          <h2 className="text-xl font-bold text-[#004A7C] mb-4">
+        <div className="mt-8 bg-white rounded-lg shadow-lg p-8">
+          <h2 className="text-xl font-bold text-[#0A2533] mb-4">
             How This Calculation Works
           </h2>
-          <ol className="list-decimal list-inside space-y-2 mb-4 text-sm">
-            <li>
-              <strong>Measure the square footage:</strong> Find the total
-              conditioned square footage of the building.
-            </li>
-            <li>
-              <strong>Evaluate the building&apos;s insulation:</strong> We
-              account for insulation levels by applying a multiplier based
-              on whether the insulation is poor, average, good, or excellent.
-            </li>
-            <li>
-              <strong>Consider the building usage:</strong> Identify
-              potential heat sources and the number of occupants, as more
-              occupants means higher cooling loads (and occupant heat gain).
-            </li>
-            <li>
-              <strong>Determine the BTU of each element:</strong> We add
-              100 BTU per occupant, 1,000 BTU per window, and 1,000 BTU per
-              exterior door. For the living area, we multiply square footage
-              by ceiling height to get volume-based BTU needs. Then, we apply
-              the insulation factor.
-            </li>
-            <li>
-              <strong>Calculate the HVAC load:</strong> We sum all BTU
-              contributions and convert to tons (1 ton per 12,000 BTU) to
-              find the recommended HVAC capacity.
-            </li>
-          </ol>
-        </section>
+          <div className="space-y-4 text-gray-600">
+            <p>
+              This tool uses a simplified version of a Manual J load calculation.
+              We consider the following factors:
+            </p>
+            <ul className="list-disc list-inside space-y-2">
+              <li>
+                <strong>Square Footage × Ceiling Height:</strong> The total
+                volume of the conditioned space.
+              </li>
+              <li>
+                <strong>Occupants:</strong> Each occupant adds roughly 100 BTU
+                per hour.
+              </li>
+              <li>
+                <strong>Windows & Doors:</strong> Each adds roughly 1,000 BTU
+                based on typical heat gains.
+              </li>
+              <li>
+                <strong>Insulation Factor:</strong> Applied to the sum, from
+                poor (1.2×) to excellent (0.75×).
+              </li>
+            </ul>
+            <p>
+              We then divide the total BTU requirement by 12,000 to estimate the
+              needed HVAC tonnage. Real-world calculations would account for
+              climate data, infiltration, solar gains, duct leaks, etc.
+            </p>
+          </div>
+        </div>
       </main>
-    </>
+    </div>
   );
 }
