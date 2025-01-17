@@ -57,10 +57,7 @@ export default function CFMCalculator() {
                         viewBox="0 0 24 24"
                       >
                         <circle cx="12" cy="12" r="10" strokeWidth="2" />
-                        <path
-                          strokeWidth="2"
-                          d="M12 16v-4M12 8h.01"
-                        />
+                        <path strokeWidth="2" d="M12 16v-4M12 8h.01" />
                       </svg>
                     </button>
                   </label>
@@ -95,10 +92,7 @@ export default function CFMCalculator() {
                         viewBox="0 0 24 24"
                       >
                         <circle cx="12" cy="12" r="10" strokeWidth="2" />
-                        <path
-                          strokeWidth="2"
-                          d="M12 16v-4M12 8h.01"
-                        />
+                        <path strokeWidth="2" d="M12 16v-4M12 8h.01" />
                       </svg>
                     </button>
                   </label>
@@ -133,10 +127,7 @@ export default function CFMCalculator() {
                         viewBox="0 0 24 24"
                       >
                         <circle cx="12" cy="12" r="10" strokeWidth="2" />
-                        <path
-                          strokeWidth="2"
-                          d="M12 16v-4M12 8h.01"
-                        />
+                        <path strokeWidth="2" d="M12 16v-4M12 8h.01" />
                       </svg>
                     </button>
                   </label>
@@ -149,6 +140,14 @@ export default function CFMCalculator() {
                     required
                   />
                 </div>
+
+                {/* Add a Calculate button */}
+                <button
+                  type="submit"
+                  className="bg-[#B4ED50] hover:bg-[#a3d647] text-[#0A2533] font-bold py-3 px-6 rounded-lg transition-colors w-full"
+                >
+                  Calculate
+                </button>
               </form>
             </div>
 
@@ -184,14 +183,16 @@ export default function CFMCalculator() {
                     Try our HVAC software
                   </h3>
                   <p className="text-gray-600">
-                    Put these calculations into action. Start managing your HVAC business
-                    more efficiently today.
+                    Put these calculations into action. Start managing your HVAC
+                    business more efficiently today.
                   </p>
                 </div>
               </div>
-              <button className="bg-[#B4ED50] hover:bg-[#a3d647] text-[#0A2533] font-bold py-3 px-6 rounded-lg transition-colors">
-                Start Free Trial
-              </button>
+              <a href="https://www.getjobber.com">
+                <button className="bg-[#B4ED50] hover:bg-[#a3d647] text-[#0A2533] font-bold py-3 px-6 rounded-lg transition-colors">
+                    Start Free Trial
+                </button>
+              </a>
             </div>
           </div>
         </div>
